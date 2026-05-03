@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>КП от Даниила — интернет-магазин на Node.js + React и самописной CMS</title>
+  <style>
+    :root{
+      --bg:#070A13;
+      --panel:#0F1524;
+      --panel-2:#121B2E;
+      --text:#EEF4FF;
+      --muted:#9FACBF;
+      --line:rgba(255,255,255,.12);
+      --accent:#70F0D7;
+      --accent-2:#8BA7FF;
+      --accent-3:#FFD36A;
+      --danger:#FF7C9A;
+      --shadow:0 24px 80px rgba(0,0,0,.42);
+      --radius:28px;
+      --radius-sm:18px;
+      --max:1180px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;
+      background:
+        radial-gradient(900px 480px at 10% -10%, rgba(112,240,215,.22), transparent 65%),
+        radial-gradient(850px 520px at 95% 10%, rgba(139,167,255,.26), transparent 62%),
+        linear-gradient(180deg,#070A13 0%,#0A0F1D 46%,#080B14 100%);
+      color:var(--text);
+      line-height:1.55;
+      letter-spacing:.01em;
+    }
+
+    a{color:inherit;text-decoration:none}
+    .page{position:relative;overflow:hidden;min-height:100vh;padding:28px}
+    .glow{
+      position:absolute;inset:auto auto 10% -18%;
+      width:520px;height:520px;border-radius:50%;
+      background:rgba(112,240,215,.07);filter:blur(20px);pointer-events:none;
+    }
+    .wrap{max-width:var(--max);margin:0 auto;position:relative;z-index:1}
+
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:18px;
+      padding:18px 20px;border:1px solid var(--line);border-radius:24px;
+      background:rgba(15,21,36,.62);backdrop-filter:blur(16px);box-shadow:var(--shadow);
+    }
+    .brand{display:flex;align-items:center;gap:14px;font-weight:800;letter-spacing:.02em}
+    .logo{
+      width:42px;height:42px;border-radius:14px;display:grid;place-items:center;
+      color:#071016;font-weight:900;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      box-shadow:0 10px 28px rgba(112,240,215,.22);
+    }
+    .top-meta{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px;color:var(--muted);font-size:14px}
+    .pill{
+      border:1px solid var(--line);border-radius:999px;padding:8px 12px;
+      background:rgba(255,255,255,.04);
+    }
+
+    .hero{
+      display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:stretch;
+      padding:54px 0 28px;
+    }
+    .hero-main,.hero-card,.section,.final-card{
+      border:1px solid var(--line);border-radius:var(--radius);
+      background:linear-gradient(180deg,rgba(18,27,46,.82),rgba(15,21,36,.72));
+      box-shadow:var(--shadow);
+      position:relative;overflow:hidden;
+    }
+    .hero-main{padding:44px}
+    .hero-main:before{
+      content:"";position:absolute;right:-120px;top:-140px;width:360px;height:360px;border-radius:50%;
+      background:radial-gradient(circle,rgba(112,240,215,.20),transparent 65%);
+    }
+    .eyebrow{display:inline-flex;gap:8px;align-items:center;color:var(--accent);font-weight:800;text-transform:uppercase;font-size:12px;letter-spacing:.14em;margin-bottom:18px}
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px var(--accent)}
+    h1{margin:0 0 18px;font-size:clamp(38px,5.2vw,70px);line-height:.98;letter-spacing:-.055em}
+    .lead{font-size:20px;color:#C9D5E7;max-width:850px;margin:0 0 28px}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:9px;
+      border-radius:16px;padding:13px 16px;font-weight:800;border:1px solid transparent;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#071016;
+    }
+    .btn.secondary{background:rgba(255,255,255,.06);color:var(--text);border-color:var(--line)}
+    .hero-card{padding:28px;display:flex;flex-direction:column;justify-content:space-between;gap:20px}
+    .price-box{padding:20px;border-radius:22px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+    .price-label{font-size:13px;color:var(--muted);text-transform:uppercase;font-weight:800;letter-spacing:.1em}
+    .price{font-size:34px;font-weight:900;letter-spacing:-.04em;margin:6px 0;color:var(--text)}
+    .small{font-size:14px;color:var(--muted)}
+    .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .metric{border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:18px;padding:16px}
+    .metric strong{display:block;font-size:22px;line-height:1.1}
+    .metric span{color:var(--muted);font-size:13px}
+
+    .section{padding:34px;margin:24px 0}
+    .section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:24px}
+    h2{font-size:32px;line-height:1.05;margin:0;letter-spacing:-.035em}
+    .section-desc{max-width:610px;color:var(--muted);margin:0}
+
+    .grid{display:grid;gap:16px}
+    .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+    .grid.cols-4{grid-template-columns:repeat(4,1fr)}
+    .grid.cols-2{grid-template-columns:repeat(2,1fr)}
+    .card{
+      border:1px solid var(--line);background:rgba(255,255,255,.045);border-radius:var(--radius-sm);
+      padding:20px;min-height:100%;position:relative;overflow:hidden;
+    }
+    .card:after{
+      content:"";position:absolute;right:-42px;bottom:-52px;width:112px;height:112px;border-radius:50%;
+      background:rgba(139,167,255,.08);pointer-events:none;
+    }
+    .icon{
+      width:38px;height:38px;border-radius:13px;display:grid;place-items:center;margin-bottom:14px;
+      background:rgba(112,240,215,.12);border:1px solid rgba(112,240,215,.24);color:var(--accent);font-weight:900;
+    }
+    .card h3{margin:0 0 8px;font-size:18px;letter-spacing:-.01em}
+    .card p{margin:0;color:var(--muted);font-size:15px}
+    .tag{display:inline-flex;margin:10px 8px 0 0;padding:7px 10px;border-radius:999px;border:1px solid var(--line);color:#DCE6F7;background:rgba(255,255,255,.04);font-size:13px}
+
+    .feature-list{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:0;padding:0;list-style:none}
+    .feature-list li{
+      display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:rgba(255,255,255,.035);
+      border-radius:16px;padding:13px 14px;color:#D7E1F2;
+    }
+    .check{color:var(--accent);font-weight:900;flex:0 0 auto}
+
+    .timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;counter-reset:step}
+    .step{counter-increment:step;border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:20px;padding:18px;position:relative}
+    .step:before{
+      content:counter(step);display:grid;place-items:center;width:32px;height:32px;border-radius:12px;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#071016;font-weight:900;margin-bottom:12px;
+    }
+    .step strong{display:block;margin-bottom:6px}
+    .step span{color:var(--muted);font-size:14px}
+
+    table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.035)}
+    th,td{text-align:left;padding:16px;border-bottom:1px solid var(--line);vertical-align:top}
+    th{color:#F3F7FF;background:rgba(255,255,255,.055);font-size:14px;text-transform:uppercase;letter-spacing:.08em}
+    td{color:#CAD5E6}
+    tr:last-child td{border-bottom:none}
+    .best{color:var(--accent);font-weight:900}
+
+    .quote{
+      border-left:4px solid var(--accent);padding:18px 20px;border-radius:0 18px 18px 0;
+      background:rgba(112,240,215,.08);color:#EAFDF9;margin:0;
+    }
+    .note{
+      border:1px solid rgba(112,240,215,.28);border-radius:22px;padding:20px;
+      background:linear-gradient(135deg,rgba(112,240,215,.10),rgba(139,167,255,.07));
+      color:#EAFDF9;margin-top:18px;
+    }
+    .note strong{color:#fff}
+
+    .budget{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .plan{border:1px solid var(--line);border-radius:24px;background:rgba(255,255,255,.045);padding:22px;position:relative;overflow:hidden}
+    .plan.recommended{border-color:rgba(112,240,215,.42);background:linear-gradient(180deg,rgba(112,240,215,.09),rgba(255,255,255,.045))}
+    .badge{display:inline-flex;padding:7px 10px;border-radius:999px;background:rgba(255,211,106,.12);color:var(--accent-3);font-weight:900;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+    .plan h3{margin:0 0 8px;font-size:21px}
+    .plan .sum{font-size:27px;font-weight:900;letter-spacing:-.03em;margin:10px 0;color:#fff}
+    .plan ul{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:8px;color:#C9D5E7;font-size:14px}
+    .plan li{display:flex;gap:8px}
+
+    .final-card{padding:34px;margin:24px 0 10px;display:grid;grid-template-columns:1.1fr .9fr;gap:22px;align-items:center}
+    .final-card h2{font-size:38px}
+    .contact-card{border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.05);padding:22px}
+    .contact-row{display:flex;justify-content:space-between;gap:20px;border-bottom:1px solid var(--line);padding:12px 0;color:#D8E3F4}
+    .contact-row:last-child{border-bottom:none}
+    .contact-row span:first-child{color:var(--muted)}
+
+    .footer{padding:20px;color:var(--muted);text-align:center;font-size:13px}
+
+    @media (max-width:980px){
+      .hero,.final-card{grid-template-columns:1fr}
+      .grid.cols-4,.grid.cols-3,.budget,.timeline{grid-template-columns:repeat(2,1fr)}
+      .hero-main{padding:34px}
+    }
+    @media (max-width:640px){
+      .page{padding:14px}
+      .topbar,.section-head{align-items:flex-start;flex-direction:column}
+      .grid.cols-4,.grid.cols-3,.grid.cols-2,.feature-list,.budget,.timeline,.metric-grid{grid-template-columns:1fr}
+      .hero-main{padding:26px}
+      .section,.final-card{padding:24px;border-radius:22px}
+      h1{font-size:38px}
+      h2{font-size:27px}
+      .price{font-size:28px}
+      table,thead,tbody,th,td,tr{display:block}
+      th{display:none}
+      td{border-bottom:1px solid var(--line)}
+      tr{border-bottom:1px solid var(--line)}
+      tr:last-child{border-bottom:none}
+    }
+
+    @media print{
+      :root{--bg:#fff;--panel:#fff;--text:#101828;--muted:#475467;--line:rgba(16,24,40,.16)}
+      body{background:#fff;color:#101828}
+      .page{padding:0}
+      .wrap{max-width:none}
+      .topbar,.hero-main,.hero-card,.section,.final-card,.card,.step,.plan,.metric,.price-box,.contact-card{box-shadow:none;background:#fff;color:#101828}
+      .btn{border:1px solid #101828;background:#fff;color:#101828}
+      .eyebrow,.check,.best{color:#0F766E}
+      .section,.final-card{break-inside:avoid}
+      .hero{padding-top:18px}
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="glow"></div>
+    <div class="wrap">
+      <header class="topbar">
+        <div class="brand">
+          <div class="logo">D</div>
+          <div>
+            <div>Коммерческое предложение от Даниила</div>
+            <div class="small">Интернет-магазин на самописной CMS: Node.js + React, безопасная архитектура</div>
+          </div>
+        </div>
+        <div class="top-meta">
+          <span class="pill">Для: Алишера</span>
+          <span class="pill">Карточек товаров: 200</span>
+          <span class="pill">Node.js + React</span>
+          <span class="pill">Безопасная архитектура</span>
+          <span class="pill">Предварительная оценка</span>
+        </div>
+      </header>
+
+      <section class="hero">
+        <div class="hero-main">
+          <div class="eyebrow"><span class="dot"></span> e-commerce под задачу, а не под шаблон</div>
+          <h1>Интернет-магазин на самописной CMS: Node.js + React, безопасность и функционал под ваш проект</h1>
+          <p class="lead">Алишер, по описанию задачи вам нужен не просто красивый сайт, а удобная система для продаж: каталог, фильтры, карточки, сравнение, корзина, оформление заказа, личный кабинет, отзывы и понятная админка. Я бы делал проект на самописной CMS с сильным стеком разработки: backend на Node.js, интерфейсы на React и архитектура без лишних плагинов, чтобы функционал работал именно под ваш бизнес.</p>
+          <div class="hero-actions">
+            <a href="#cms" class="btn">Почему самописная CMS</a>
+            <a href="#stack" class="btn secondary">Стек Node.js + React</a>
+            <a href="#tz" class="btn secondary">Как оформим ТЗ</a>
+            <a href="#budget" class="btn secondary">Бюджет</a>
+          </div>
+        </div>
+        <aside class="hero-card">
+          <div class="price-box">
+            <div class="price-label">Ориентир по задаче</div>
+            <div class="price">120 000–150 000 ₽</div>
+            <div class="small">Это предварительная рамка по описанию. Финальную стоимость зафиксирую после полного ТЗ: нужно увидеть структуру каталога, параметры фильтров, сценарии оформления заказа, личный кабинет и интеграции.</div>
+          </div>
+          <div class="metric-grid">
+            <div class="metric"><strong>4–7</strong><span>недель на первую рабочую версию после утверждения ТЗ</span></div>
+            <div class="metric"><strong>200</strong><span>товаров, контент уже есть</span></div>
+            <div class="metric"><strong>Node.js</strong><span>backend, API, заказы, безопасность</span></div>
+            <div class="metric"><strong>React</strong><span>витрина, админка, быстрый интерфейс</span></div>
+            <div class="metric"><strong>CMS</strong><span>админка под ваши процессы</span></div>
+            <div class="metric"><strong>Security</strong><span>роли, доступы, защита API</span></div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Что я услышал в задаче</h2>
+          <p class="section-desc">Вам нужен исполнитель, который понимает интернет-магазин не только как набор страниц, а как систему: где покупатель быстро находит товар, а команда спокойно управляет продажами.</p>
+        </div>
+        <div class="grid cols-3">
+          <article class="card">
+            <div class="icon">01</div>
+            <h3>Покупателю должно быть просто</h3>
+            <p>Каталог, поиск, фильтры, сравнение и карточки товаров должны помогать выбрать товар без лишних вопросов и хаоса.</p>
+          </article>
+          <article class="card">
+            <div class="icon">02</div>
+            <h3>Админка должна быть удобной</h3>
+            <p>Товары, цены, заказы, отзывы и контент нужно менять без постоянного обращения к разработчику.</p>
+          </article>
+          <article class="card">
+            <div class="icon">03</div>
+            <h3>Проект должен расти</h3>
+            <p>Важно сразу заложить нормальную структуру, чтобы потом добавлять интеграции, разделы, SEO и новые функции без переделки всего сайта.</p>
+          </article>
+        </div>
+        <div class="note">
+          <strong>Мой подход:</strong> сначала спокойно разбираю ТЗ и логику магазина, затем предлагаю понятную архитектуру. Не начинаю с фразы «сделаем как-нибудь», потому что в e-commerce мелочи быстро превращаются в доработки, потери времени и лишний бюджет.
+        </div>
+      </section>
+
+      <section class="section" id="cms">
+        <div class="section-head">
+          <h2>Почему самописная CMS здесь будет сильным решением</h2>
+          <p class="section-desc">CMS будет не универсальной «для всего подряд», а сделанной под ваш каталог, роли, заказы, фильтры и сценарии работы. Основа — современная разработка на Node.js + React, а не набор случайных плагинов.</p>
+        </div>
+        <div class="grid cols-3">
+          <article class="card">
+            <div class="icon">⚙</div>
+            <h3>Функционал под проект</h3>
+            <p>В системе будут только нужные модули: товары, категории, фильтры, заказы, пользователи, отзывы, страницы, настройки SEO и интеграции.</p>
+          </article>
+          <article class="card">
+            <div class="icon">⌕</div>
+            <h3>Фильтры без костылей</h3>
+            <p>Фильтрация будет строиться по реальным характеристикам ваших товаров, а не под ограничения готовой темы или случайного плагина.</p>
+          </article>
+          <article class="card">
+            <div class="icon">⛓</div>
+            <h3>Меньше зависимости от плагинов</h3>
+            <p>Не будет набора лишних расширений, которые конфликтуют между собой, тормозят сайт и ломаются после обновлений.</p>
+          </article>
+          <article class="card">
+            <div class="icon">UX</div>
+            <h3>Админка человеческим языком</h3>
+            <p>Поля, статусы и разделы можно назвать так, как удобно вашей команде: без лишних технических терминов и непонятных вкладок.</p>
+          </article>
+          <article class="card">
+            <div class="icon">SEO</div>
+            <h3>SEO сразу в структуре</h3>
+            <p>ЧПУ, метатеги, заголовки, sitemap, robots и структура категорий будут заложены не в конце, а на этапе архитектуры.</p>
+          </article>
+          <article class="card">
+            <div class="icon">↗</div>
+            <h3>Развитие без переделки</h3>
+            <p>Можно постепенно добавлять промокоды, бонусы, импорт товаров, интеграции с CRM/1С, расширенный ЛК и аналитику.</p>
+          </article>
+        </div>
+        <div class="note">
+          <strong>Важно:</strong> самописная CMS — это не «на коленке». Это аккуратная разработка с понятной структурой, доступами, безопасной API-логикой, инструкцией для администратора и кодовой базой, которую можно поддерживать и развивать дальше.
+        </div>
+      </section>
+
+      <section class="section" id="stack">
+        <div class="section-head">
+          <h2>Сильный стек разработки на 2026 год</h2>
+          <p class="section-desc">Я бы не строил такой магазин на случайных плагинах. Для проекта лучше заложить понятную техническую основу: чтобы сайт быстро работал, нормально индексировался, был безопасным и не разваливался при развитии.</p>
+        </div>
+        <div class="grid cols-3">
+          <article class="card">
+            <div class="icon">JS</div>
+            <h3>Node.js LTS + TypeScript</h3>
+            <p>Серверная часть: API, логика каталога, корзина, оформление заказа, личный кабинет, роли, уведомления и интеграции. TypeScript снижает риск ошибок в сложной логике.</p>
+          </article>
+          <article class="card">
+            <div class="icon">R</div>
+            <h3>React / Next.js</h3>
+            <p>Интерфейс витрины и админки: быстрый, аккуратный и удобный. Для SEO-важных страниц можно использовать серверный рендеринг, чтобы категории и карточки лучше отдавались поисковым системам.</p>
+          </article>
+          <article class="card">
+            <div class="icon">DB</div>
+            <h3>PostgreSQL</h3>
+            <p>Надежная база для товаров, характеристик, заказов, пользователей, ролей, отзывов и истории действий. Хорошо подходит для структурированного e-commerce.</p>
+          </article>
+          <article class="card">
+            <div class="icon">⚡</div>
+            <h3>Redis для скорости</h3>
+            <p>Кэширование частых данных, ограничение частоты запросов, временные токены и ускорение тяжелых участков, если это потребуется по нагрузке.</p>
+          </article>
+          <article class="card">
+            <div class="icon">API</div>
+            <h3>API-first архитектура</h3>
+            <p>Витрина, админка и интеграции общаются с backend через понятный API. Это упрощает развитие: мобильное приложение, CRM, 1С, склад или новые разделы можно подключать без полной переделки.</p>
+          </article>
+          <article class="card">
+            <div class="icon">CI</div>
+            <h3>Docker и аккуратный деплой</h3>
+            <p>Проект можно развернуть предсказуемо: отдельно backend, frontend, база, кэш, переменные окружения, резервные копии и понятный процесс обновлений.</p>
+          </article>
+        </div>
+        <div class="note">
+          <strong>По-честному:</strong> для боевого магазина важнее не гнаться за самым модным «current»-релизом, а брать проверенные LTS-версии, нормальную архитектуру и писать код так, чтобы его можно было поддерживать после запуска.
+        </div>
+      </section>
+
+      <section class="section" id="security">
+        <div class="section-head">
+          <h2>Безопасная архитектура без лишней драмы</h2>
+          <p class="section-desc">В интернет-магазине есть клиенты, заказы, контакты, админка и платежные сценарии. Поэтому безопасность нужно закладывать сразу, а не добавлять в конце «для галочки».</p>
+        </div>
+        <ul class="feature-list">
+          <li><span class="check">✓</span><span>Разделение публичной витрины, API и административной части.</span></li>
+          <li><span class="check">✓</span><span>Роли и права доступа: владелец, администратор, менеджер — по реальным процессам команды.</span></li>
+          <li><span class="check">✓</span><span>Защищенная авторизация: безопасное хранение паролей, сессии/токены, ограничения на попытки входа.</span></li>
+          <li><span class="check">✓</span><span>Проверка всех входящих данных: формы, фильтры, корзина, оформление заказа, отзывы и админские поля.</span></li>
+          <li><span class="check">✓</span><span>Защита API: CORS, rate limiting, проверка прав на уровне каждого важного действия и объекта.</span></li>
+          <li><span class="check">✓</span><span>Защита от типовых рисков: XSS, CSRF, SQL-инъекции, перебор паролей и случайная выдача чужих данных.</span></li>
+          <li><span class="check">✓</span><span>Журнал важных действий в админке: кто изменил товар, заказ, цену, статус или настройки.</span></li>
+          <li><span class="check">✓</span><span>Резервные копии, аккуратный деплой, HTTPS, безопасные заголовки и хранение секретов вне кода.</span></li>
+        </ul>
+        <div class="note">
+          <strong>Нормальный подход:</strong> безопасность не должна мешать работе админа, но должна закрывать критичные места: доступы, заказы, персональные данные, API и административные действия.
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Что войдет в первую версию</h2>
+          <p class="section-desc">Состав работ собран по вашему описанию. После полного ТЗ я разложу каждый пункт на конкретные экраны, поля, сценарии и критерии приемки.</p>
+        </div>
+        <ul class="feature-list">
+          <li><span class="check">✓</span><span>Главная страница с входами в каталог, преимуществами магазина и ключевыми блоками.</span></li>
+          <li><span class="check">✓</span><span>Каталог на 200 товаров: категории, подкатегории, сортировка, пагинация или подгрузка.</span></li>
+          <li><span class="check">✓</span><span>Поиск по товарам и сайту, понятная выдача результатов.</span></li>
+          <li><span class="check">✓</span><span>Фильтры по параметрам товара: цена, характеристики, наличие, бренд/тип/модель — по ТЗ.</span></li>
+          <li><span class="check">✓</span><span>Карточка товара: фото, описание, характеристики, цена, наличие, покупка, похожие товары.</span></li>
+          <li><span class="check">✓</span><span>Сравнение товаров по характеристикам.</span></li>
+          <li><span class="check">✓</span><span>Корзина, оформление заказа, проверка полей, статусы и уведомления.</span></li>
+          <li><span class="check">✓</span><span>Личный кабинет: данные клиента, история заказов, статусы, базовая авторизация.</span></li>
+          <li><span class="check">✓</span><span>Отзывы с модерацией и защитой от спама.</span></li>
+          <li><span class="check">✓</span><span>Самописная админ-панель на React для товаров, категорий, заказов, клиентов, отзывов и контента.</span></li>
+          <li><span class="check">✓</span><span>Адаптивная верстка под компьютер, планшет и телефон.</span></li>
+          <li><span class="check">✓</span><span>Backend на Node.js: API, авторизация, заказы, статусы, уведомления, работа с базой данных.</span></li>
+          <li><span class="check">✓</span><span>Техническая SEO-база: ЧПУ, метатеги, sitemap, robots, базовая микроразметка.</span></li>
+        </ul>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Как будет устроена CMS</h2>
+          <p class="section-desc">Главная цель — чтобы администратор мог спокойно работать с магазином каждый день: добавлять товары, менять цены, видеть заказы и управлять контентом.</p>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Модуль</th>
+              <th>Что внутри</th>
+              <th>Зачем это нужно</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Товары и категории</strong></td>
+              <td>Карточки, фото, характеристики, цены, наличие, статусы, похожие товары.</td>
+              <td><span class="best">Быстрое управление каталогом</span> без лишних действий и сложного интерфейса.</td>
+            </tr>
+            <tr>
+              <td><strong>Фильтры и характеристики</strong></td>
+              <td>Настройка параметров для категорий: цена, тип, бренд, модель, свойства и другие поля.</td>
+              <td>Покупатель видит только полезные фильтры, а не случайный набор полей.</td>
+            </tr>
+            <tr>
+              <td><strong>Заказы и клиенты</strong></td>
+              <td>Список заказов, состав заказа, контакты клиента, статусы, комментарии, уведомления.</td>
+              <td>Команда видит, что происходит с продажами, и не теряет заявки.</td>
+            </tr>
+            <tr>
+              <td><strong>Контент и SEO</strong></td>
+              <td>Страницы, тексты, заголовки, метатеги, ЧПУ, SEO-поля категорий и товаров.</td>
+              <td>Сайт можно наполнять и продвигать без вмешательства в код.</td>
+            </tr>
+            <tr>
+              <td><strong>Отзывы и модерация</strong></td>
+              <td>Отзывы к товарам, статусы публикации, базовая защита от спама.</td>
+              <td>Можно собирать доверие к товарам и контролировать качество публикаций.</td>
+            </tr>
+            <tr>
+              <td><strong>Техническое ядро</strong></td>
+              <td>Node.js backend, React-интерфейс, база данных, API, роли, права доступа, журнал важных действий.</td>
+              <td>Система не просто «выглядит как магазин», а нормально работает внутри и готова к развитию.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="section" id="tz">
+        <div class="section-head">
+          <h2>Как я предлагаю оформить ТЗ</h2>
+          <p class="section-desc">Без перегруженного канцелярита. ТЗ должно быть понятным и вам, и разработчику: что делаем, как работает, где границы задачи и как принимаем результат.</p>
+        </div>
+        <div class="grid cols-2">
+          <article class="card">
+            <div class="icon">1</div>
+            <h3>Сначала фиксируем простыми словами</h3>
+            <p>Какие разделы нужны, как покупатель выбирает товар, как оформляет заказ, что видит в личном кабинете, что делает администратор.</p>
+          </article>
+          <article class="card">
+            <div class="icon">2</div>
+            <h3>Потом раскладываем на сценарии</h3>
+            <p>Например: «покупатель зашел в категорию → выбрал фильтры → открыл карточку → добавил в корзину → оформил заказ → получил уведомление».</p>
+          </article>
+          <article class="card">
+            <div class="icon">3</div>
+            <h3>Отделяем первый запуск от будущих доработок</h3>
+            <p>Так мы не раздуваем бюджет и сроки. То, что критично для старта, делаем сразу; остальное планируем как развитие.</p>
+          </article>
+          <article class="card">
+            <div class="icon">4</div>
+            <h3>Фиксируем критерии приемки</h3>
+            <p>Чтобы было понятно, когда задача считается выполненной: какие страницы готовы, какие функции работают, какие формы отправляются, какие роли есть в админке.</p>
+          </article>
+        </div>
+        <div class="note">
+          <strong>По-человечески:</strong> я не буду заваливать вас техническими терминами. Где нужен выбор — объясню варианты, плюсы, минусы и последствия для бюджета. Где можно сделать проще без потери качества — скажу прямо.
+        </div>
+      </section>
+
+      <section class="section" id="steps">
+        <div class="section-head">
+          <h2>Этапы работы</h2>
+          <p class="section-desc">Такой порядок снижает риск хаоса, бесконечных правок и ситуаций, когда важная логика всплывает уже в конце разработки.</p>
+        </div>
+        <div class="timeline">
+          <div class="step"><strong>Разбор ТЗ</strong><span>Изучаю документы, задаю вопросы, фиксирую функции, роли, интеграции и структуру каталога.</span></div>
+          <div class="step"><strong>Архитектура</strong><span>Проектирую самописную CMS: стек Node.js + React, модули, сущности, права, фильтры, заказы, SEO, безопасность и дальнейшее развитие.</span></div>
+          <div class="step"><strong>Прототипы</strong><span>Согласуем логику ключевых экранов: каталог, карточка, корзина, checkout, ЛК, админка.</span></div>
+          <div class="step"><strong>Дизайн и верстка</strong><span>Готовлю адаптивный интерфейс, чтобы сайт выглядел аккуратно и удобно работал на разных устройствах.</span></div>
+          <div class="step"><strong>Разработка CMS</strong><span>Собираю backend на Node.js, интерфейсы на React, админку, каталог, фильтры, товары, заказы, пользователей, отзывы и контентные страницы.</span></div>
+          <div class="step"><strong>Интеграции</strong><span>Подключаю оплату, доставку, уведомления, аналитику, CRM/1С — если это входит в первый этап.</span></div>
+          <div class="step"><strong>Тестирование</strong><span>Проверяю сценарии покупки, формы, адаптив, фильтры, заказы, личный кабинет и админку.</span></div>
+          <div class="step"><strong>Запуск</strong><span>Перенос на хостинг, финальная проверка, передача доступов, инструкция и поддержка на старте.</span></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Интеграции и развитие</h2>
+          <p class="section-desc">Архитектуру лучше заложить так, чтобы магазин не уперся в потолок через пару месяцев после запуска.</p>
+        </div>
+        <div class="grid cols-3">
+          <article class="card"><div class="icon">₽</div><h3>Оплата и доставка</h3><p>Подключение платежных систем, способов доставки, расчета стоимости и статусов после уточнения сервисов.</p></article>
+          <article class="card"><div class="icon">CRM</div><h3>CRM / 1С / склад</h3><p>Если нужен обмен заказами, остатками, ценами или клиентами — вынесем в отдельный блок оценки.</p></article>
+          <article class="card"><div class="icon">GA</div><h3>Аналитика и SEO</h3><p>Настройка целей, событий, e-commerce аналитики, индексации и базового технического SEO.</p></article>
+        </div>
+        <div style="margin-top:18px">
+          <span class="tag">Импорт/экспорт товаров</span>
+          <span class="tag">Email/SMS/Telegram-уведомления</span>
+          <span class="tag">Промокоды и скидки</span>
+          <span class="tag">Роли администраторов</span>
+          <span class="tag">Безопасная API-архитектура</span>
+          <span class="tag">Микроразметка товаров</span>
+          <span class="tag">Оптимизация скорости</span>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Релевантный опыт</h2>
+          <p class="section-desc">Есть практический опыт e-commerce-проектов с каталогом, карточками, корзиной, формами, оформлением заказа и админкой.</p>
+        </div>
+        <blockquote class="quote">
+          Из последнего релевантного кейса: <strong>ewra.ru</strong> — интернет-магазин с каталогом, карточками товаров, корзиной, оформлением заказа, формами заявок, доставкой/оплатой и админкой. Готов показать и объяснить, как была устроена логика проекта.
+        </blockquote>
+      </section>
+
+      <section class="section" id="budget">
+        <div class="section-head">
+          <h2>Бюджетные варианты</h2>
+          <p class="section-desc">Ниже — предварительная рамка. После полного ТЗ я разложу смету по блокам: CMS, каталог, фильтры, карточки, корзина, ЛК, админка, интеграции, SEO и тестирование.</p>
+        </div>
+        <div class="budget">
+          <article class="plan">
+            <span class="badge">Компактный старт</span>
+            <h3>MVP на самописной CMS</h3>
+            <div class="sum">от 100 000 ₽</div>
+            <p class="small">Если нужно запуститься аккуратно, но часть сложных функций можно вынести во второй этап.</p>
+            <ul>
+              <li><span class="check">✓</span>Каталог и карточки</li>
+              <li><span class="check">✓</span>Базовые фильтры</li>
+              <li><span class="check">✓</span>Корзина и оформление заказа</li>
+              <li><span class="check">✓</span>Админка под товары и заказы</li>
+            </ul>
+          </article>
+          <article class="plan recommended">
+            <span class="badge">Рекомендую</span>
+            <h3>Полноценный e-commerce</h3>
+            <div class="sum">120 000–150 000 ₽</div>
+            <p class="small">Оптимальный вариант под ваш запрос: каталог, фильтры, сравнение, ЛК, отзывы, SEO, самописная CMS на Node.js + React и безопасная архитектура.</p>
+            <ul>
+              <li><span class="check">✓</span>Расширенный каталог и фильтры</li>
+              <li><span class="check">✓</span>Сравнение товаров</li>
+              <li><span class="check">✓</span>Личный кабинет</li>
+              <li><span class="check">✓</span>Отзывы с модерацией</li>
+              <li><span class="check">✓</span>SEO-база, безопасность и тестирование</li>
+            </ul>
+          </article>
+          <article class="plan">
+            <span class="badge">По ТЗ</span>
+            <h3>Интеграции и сложная логика</h3>
+            <div class="sum">индивидуально</div>
+            <p class="small">Если потребуется 1С, складская логика, сложные цены, роли, бонусы или нестандартный личный кабинет.</p>
+            <ul>
+              <li><span class="check">✓</span>CRM/1С/склад</li>
+              <li><span class="check">✓</span>Сложные права и роли</li>
+              <li><span class="check">✓</span>Нестандартные сценарии заказа</li>
+              <li><span class="check">✓</span>Расширенная аналитика</li>
+            </ul>
+          </article>
+        </div>
+        <div class="note">
+          <strong>Почему не называю финальную цену сразу:</strong> в интернет-магазине стоимость сильно зависит от деталей: какие фильтры, как устроены товары, нужна ли оплата, доставка, CRM, импорт, роли, статусы, уведомления и требования по безопасности. Я могу зафиксировать точную смету после полного ТЗ, чтобы у вас не было сюрпризов в середине проекта.
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Что нужно от вас для точной оценки</h2>
+          <p class="section-desc">Чтобы не гадать и не давать абстрактные обещания, мне достаточно получить полное ТЗ и несколько уточнений.</p>
+        </div>
+        <div class="grid cols-2">
+          <article class="card">
+            <div class="icon">ТЗ</div>
+            <h3>Полное описание проекта</h3>
+            <p>Разделы сайта, структура каталога, характеристики товаров, логика фильтров, требования к карточке товара и личному кабинету.</p>
+          </article>
+          <article class="card">
+            <div class="icon">UX</div>
+            <h3>Референсы и конкуренты</h3>
+            <p>Сайты, которые нравятся по структуре/визуалу, и сайты конкурентов, от которых нужно отстроиться.</p>
+          </article>
+          <article class="card">
+            <div class="icon">API</div>
+            <h3>Интеграции</h3>
+            <p>Оплата, доставка, CRM, 1С, склад, уведомления, импорт/экспорт товаров — что обязательно на первом этапе.</p>
+          </article>
+          <article class="card">
+            <div class="icon">⚑</div>
+            <h3>Приоритеты запуска</h3>
+            <p>Что должно быть в первой версии, а что можно спокойно вынести в развитие, чтобы не раздувать стартовый бюджет.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="final-card">
+        <div>
+          <div class="eyebrow"><span class="dot"></span> готов подключиться к проекту</div>
+          <h2>Могу изучить полное ТЗ и подготовить точную смету по блокам</h2>
+          <p class="lead" style="font-size:18px;margin-bottom:0">После получения ТЗ я покажу, как лучше собрать первую версию интернет-магазина на самописной CMS и стеке Node.js + React: что войдет в запуск, что лучше оставить на развитие, какие есть риски, как будет устроена безопасность и где можно сэкономить без потери качества.</p>
+        </div>
+        <div class="contact-card">
+          <div class="contact-row"><span>Исполнитель</span><strong>Даниил</strong></div>
+          <div class="contact-row"><span>Телефон</span><strong>+7 937 217-22-03</strong></div>
+          <div class="contact-row"><span>Формат</span><strong>Разработка под ключ</strong></div>
+          <div class="contact-row"><span>Платформа</span><strong>Самописная CMS на Node.js + React</strong></div>
+          <div class="contact-row"><span>Архитектура</span><strong>Безопасная API-логика, роли и масштабирование</strong></div>
+          <div class="contact-row"><span>Кейс</span><strong>ewra.ru</strong></div>
+        </div>
+      </section>
+
+      <div class="footer">Предварительное коммерческое предложение. Финальные сроки, стоимость, стек и архитектура фиксируются после изучения полного технического задания.</div>
+    </div>
+  </main>
+</body>
+</html>
